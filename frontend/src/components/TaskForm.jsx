@@ -1,0 +1,67 @@
+'use client';
+import { useState, useEffect } from 'react';
+
+export default function TaskForm({ onSubmit, initialData }) {
+  const [form, setForm] = useState({
+    title: '',
+    description: '',
+    dueDate: '',
+    status: 'open',
+  });
+
+  useEffect(() => {
+    if (initialData) {
+      setForm({
+        title: initialData.title || '',
+        description: initialData.description || '',
+        dueDate: initialData.dueDate?.split('T')[0] || '',
+        status: initialData.status || 'open',
+      });
+    }
+  }, [initialData]);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!form.title) return alert('Title is required');
+    onSubmit(form);
+    setForm({ title: '', description: '', dueDate: '', status: 'pending' });
+  };
+
+  return (
+    <form onSubmit={handleSubmit} style={{ marginBottom: '20px' }}>
+      <input
+        type="text"
+        name="title"
+        placeholder="Task title"
+        value={form.title}
+        onChange={handleChange}
+        required
+      />
+      <input
+        type="text"
+        name="description"
+        placeholder="Description"
+        value={form.description}
+        onChange={handleChange}
+      />
+      <input
+        type="date"
+        name="dueDate"
+        value={form.dueDate}
+        onChange={handleChange}
+      />
+      <select name="status" value={form.status} onChange={handleChange}>
+        <option value="open">Open</option>
+        <option value="in_progress">In Progress</option>
+        <option value="completed">Completed</option>
+        <option value="overdue">Overdue</option>
+      </select>
+      <button type="submit">{initialData ? 'Update Task' : 'Create Task'}</button>
+    </form>
+  );
+}
