@@ -19,7 +19,7 @@ connectDB();
 setupRecurringTaskJob();
 const allowedOrigins = [
   'http://localhost:3000',
-  'https://task-manager-app-eight-mu.vercel.app'
+  'https://task-manager-app-two-xi.vercel.app'
 ];
 
 app.use(cors({
