@@ -16,15 +16,15 @@ const PORT = process.env.PORT || 5000;
 connectDB(); // uses process.env.MONGO_URI
 
 
-// Configure CORS to allow requests from your Vercel app's origin
-const corsOptions = {
-  origin: 'https://task-manager-app-rose-six.vercel.app', // Replace with your actual Vercel URL
-  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-  credentials: true, // If you need to handle cookies across origins
-};
+// // Configure CORS to allow requests from your Vercel app's origin
+// const corsOptions = {
+//   origin: 'https://task-manager-app-rose-six.vercel.app', // Replace with your actual Vercel URL
+//   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+//   credentials: true, // If you need to handle cookies across origins
+// };
 
-app.use(cors(corsOptions));
-// app.use(cors());
+// app.use(cors(corsOptions));
+app.use(cors());
 app.use(bodyParser.json());
 
 
