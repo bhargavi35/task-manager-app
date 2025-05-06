@@ -16,17 +16,24 @@ const PORT = process.env.PORT || 5000;
 
 connectDB();
 
-// // Configure CORS to allow requests from your Vercel app's origin
-// const corsOptions = {
-//   origin: 'https://task-manager-app-rose-six.vercel.app', // Replace with your actual Vercel URL
-//   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-//   credentials: true, // If you need to handle cookies across origins
-// };
-
 setupRecurringTaskJob();
+const allowedOrigins = [
+  'http://localhost:3000',
+  'https://task-manager-app-eight-mu.vercel.app'
+];
 
-// app.use(cors(corsOptions));
-app.use(cors());
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true
+}));
+
+// app.use(cors());
 app.use(bodyParser.json());
 
 
