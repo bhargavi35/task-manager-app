@@ -8,17 +8,20 @@ import Layout from '../../components/Layout';
 import TaskForm from '../../components/TaskForm';
 import TaskCard from '../../components/TaskCard';
 
+const API_BASE_URL = process.env.BACKEND_URL
+
 export default function DashboardPage() {
   const { user } = useAuth();
   const [tasks, setTasks] = useState([]);
   const [loadingTasks, setLoadingTasks] = useState(true);
   const [statusSummary, setStatusSummary] = useState({ open: 0, completed: 0 });
 
+
   const fetchDashboardData = async () => {
     setLoadingTasks(true);
     try {
       if (user?.id) {
-        const res = await API.get(`/tasks?creatorId=${user.id}&limit=5&sortBy=dueDate`);
+        const res = await API.get(`${API_BASE_URL}/tasks?creatorId=${user.id}&limit=5&sortBy=dueDate`);
         const fetchedTasks = res.data.tasks || [];
 
         setTasks(fetchedTasks);
@@ -36,7 +39,7 @@ export default function DashboardPage() {
 
   const handleCreate = async (formData) => {
     try {
-      await API.post('/tasks', { ...formData, creatorId: user.id });
+      await API.post(`${API_BASE_URL}/tasks`, { ...formData, creatorId: user.id });
       fetchDashboardData(); // Refresh list after creating
     } catch (err) {
       console.error('Error creating task:', err);
@@ -50,7 +53,7 @@ export default function DashboardPage() {
   return (
     <Layout>
       <h2>Welcome back, {user?.username} 👋</h2>
-      
+
       <section>
         <h3>Create a Quick Task</h3>
         <TaskForm onSubmit={handleCreate} />

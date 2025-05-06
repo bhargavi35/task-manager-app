@@ -3,6 +3,8 @@ import { useState } from 'react';
 import API from '../../services/api';
 import { useRouter } from 'next/navigation';
 
+const API_BASE_URL = process.env.BACKEND_URL
+
 export default function RegisterPage() {
   const router = useRouter();
   const [form, setForm] = useState({ name: '', username: '', email: '', password: '' });
@@ -14,7 +16,7 @@ export default function RegisterPage() {
     setLoading(true);
     setError('');
     try {
-      await API.post('/auth/register', form);
+      await API.post(`${API_BASE_URL}/auth/register`, form);
       router.push('/login');
     } catch (err) {
       console.error('Registration failed:', err);

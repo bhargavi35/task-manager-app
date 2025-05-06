@@ -9,6 +9,8 @@ import Header from '../../components/Header';
 import TaskCard from '../../components/TaskCard';
 import TaskForm from '../../components/TaskForm';
 
+const API_BASE_URL = process.env.BACKEND_URL
+
 export default function TasksPage() {
   const { user } = useAuth();
   const [tasks, setTasks] = useState([]);
@@ -21,7 +23,7 @@ export default function TasksPage() {
   const fetchTasks = async () => {
     setLoading(true);
     try {
-      const res = await API.get(`/tasks?creatorId=${user.id}&page=${page}&limit=${limit}`);
+      const res = await API.get(`${API_BASE_URL}/tasks?creatorId=${user.id}&page=${page}&limit=${limit}`);
       setTasks(res.data.tasks);
       const total = res.data.total || 0;
       setTotalPages(Math.ceil(total / limit));
@@ -34,7 +36,7 @@ export default function TasksPage() {
 
   const handleCreate = async (formData) => {
     try {
-      await API.post('/tasks', { ...formData, creatorId: user.id });
+      await API.post(`${API_BASE_URL}/tasks`, { ...formData, creatorId: user.id });
       fetchTasks();
     } catch (err) {
       console.error('Error creating task:', err);
@@ -43,7 +45,7 @@ export default function TasksPage() {
 
   const handleUpdate = async (id, formData) => {
     try {
-      await API.put(`/tasks/${id}`, formData);
+      await API.put(`${API_BASE_URL}/tasks/${id}`, formData);
       fetchTasks();
       setEditingTask(null);
     } catch (err) {
@@ -53,7 +55,7 @@ export default function TasksPage() {
 
   const handleDelete = async (id) => {
     try {
-      await API.delete(`/tasks/${id}`);
+      await API.delete(`${API_BASE_URL}/tasks/${id}`);
       fetchTasks();
     } catch (err) {
       console.error('Error deleting task:', err);

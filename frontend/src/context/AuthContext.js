@@ -5,6 +5,8 @@ import API, { setToken } from '../services/api';
 
 const AuthContext = createContext();
 
+const API_BASE_URL = process.env.BACKEND_URL
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   // console.log(user,'authuser');
@@ -12,7 +14,7 @@ export const AuthProvider = ({ children }) => {
   const router = useRouter();
 
   const login = async (username, password) => {
-    const res = await API.post('/auth/login', { username, password });
+    const res = await API.post(`${API_BASE_URL}/auth/login`, { username, password });
     localStorage.setItem('token', res.data.token);
     setToken(res.data.token);
     // setUser(res.data.user);
@@ -31,7 +33,7 @@ export const AuthProvider = ({ children }) => {
     if (token) {
       try {
         setToken(token);
-        const res = await API.get(`/users/${user.id}`);
+        const res = await API.get(`${API_BASE_URL}/users/${user.id}`);
         setUser(res.data);
       } catch (err) {
         logout();
