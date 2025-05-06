@@ -9,11 +9,11 @@
 !.yarn/plugins
 !.yarn/releases
 !.yarn/versions
-/.env
+# /.env
 dist
 build
 .next
-.env
+# .env
 
 # testing
 /coverage
