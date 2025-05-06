@@ -10,6 +10,11 @@ const TaskSchema = new mongoose.Schema({
   assigneeId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
+  recurrence: {
+    type: String,
+    enum: ['none', 'daily', 'weekly', 'monthly'],
+    default: 'none'
+  }
 });
 
 module.exports = mongoose.model('Task', TaskSchema);

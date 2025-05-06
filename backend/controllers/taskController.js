@@ -20,7 +20,7 @@ exports.createTask = async (req, res) => {
 
 exports.getAllTasks = async (req, res) => {
   try {
-    const { creatorId, page = 1, limit = 2 } = req.query;
+    const { creatorId, page = 1, limit = 10 } = req.query;
 
     const query = {};
     if (creatorId) {

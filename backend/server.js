@@ -3,8 +3,9 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const dotenv = require('dotenv');
-dotenv.config(); // ✅ Load .env before anything else
+const setupRecurringTaskJob = require('./cron/recurringTasks');
 
+dotenv.config();
 const connectDB = require('./database/db');
 const authRoutes = require('./routes/auth');
 const taskRoutes = require('./routes/tasks');
@@ -13,8 +14,7 @@ const userRoutes = require('./routes/user');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-connectDB(); // uses process.env.MONGO_URI
-
+connectDB();
 
 // // Configure CORS to allow requests from your Vercel app's origin
 // const corsOptions = {
@@ -22,6 +22,8 @@ connectDB(); // uses process.env.MONGO_URI
 //   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
 //   credentials: true, // If you need to handle cookies across origins
 // };
+
+setupRecurringTaskJob();
 
 // app.use(cors(corsOptions));
 app.use(cors());

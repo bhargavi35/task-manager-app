@@ -7,6 +7,7 @@ export default function TaskForm({ onSubmit, initialData }) {
     description: '',
     dueDate: '',
     status: 'open',
+    recurrence: 'none'
   });
 
   useEffect(() => {
@@ -16,6 +17,7 @@ export default function TaskForm({ onSubmit, initialData }) {
         description: initialData.description || '',
         dueDate: initialData.dueDate?.split('T')[0] || '',
         status: initialData.status || 'open',
+        recurrence: initialData.recurrence || 'none',
       });
     }
   }, [initialData]);
@@ -60,6 +62,12 @@ export default function TaskForm({ onSubmit, initialData }) {
         <option value="in_progress">In Progress</option>
         <option value="completed">Completed</option>
         <option value="overdue">Overdue</option>
+      </select>
+      <select name="recurrence" value={form.recurrence || 'none'} onChange={handleChange}>
+        <option value="none">No Repeat</option>
+        <option value="daily">Daily</option>
+        <option value="weekly">Weekly</option>
+        <option value="monthly">Monthly</option>
       </select>
       <button type="submit">
         {initialData ? 'Update' : 'Create'}
