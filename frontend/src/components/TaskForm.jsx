@@ -33,11 +33,11 @@ export default function TaskForm({ onSubmit, initialData }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} style={{ marginBottom: '20px' }}>
+    <form onSubmit={handleSubmit}>
       <input
         type="text"
         name="title"
-        placeholder="Task title"
+        placeholder="Title"
         value={form.title}
         onChange={handleChange}
         required
@@ -61,7 +61,9 @@ export default function TaskForm({ onSubmit, initialData }) {
         <option value="completed">Completed</option>
         <option value="overdue">Overdue</option>
       </select>
-      <button type="submit">{initialData ? 'Update Task' : 'Create Task'}</button>
+      <button type="submit">
+        {initialData ? 'Update' : 'Create'}
+      </button>
     </form>
   );
 }

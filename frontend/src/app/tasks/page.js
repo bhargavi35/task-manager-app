@@ -1,52 +1,50 @@
+// app/tasks/page.jsx
 'use client';
 
 import { useEffect, useState } from 'react';
 import API from '../../services/api';
-import TaskCard from '../../components/TaskCard';
-import TaskForm from '../../components/TaskForm';
+import { useAuth } from '../../context/AuthContext';
 import Sidebar from '../../components/Sidebar';
 import Header from '../../components/Header';
-import { useAuth } from '../../context/AuthContext'; // Import the AuthContext
+import TaskCard from '../../components/TaskCard';
+import TaskForm from '../../components/TaskForm';
 
 export default function TasksPage() {
-  const { user } = useAuth(); // Get the logged-in user
+  const { user } = useAuth();
   const [tasks, setTasks] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [editingTask, setEditingTask] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const limit = 5;
 
-  const fetchUserTasks = async () => {
+  const fetchTasks = async () => {
     setLoading(true);
     try {
-      if (user?.id) {
-        const res = await API.get(`/tasks?creatorId=${user.id}`); // Fetch tasks filtered by creatorId
-        setTasks(res.data);
-      } else {
-        setTasks([]);
-      }
+      const res = await API.get(`/tasks?creatorId=${user.id}&page=${page}&limit=${limit}`);
+      setTasks(res.data.tasks);
+      const total = res.data.total || 0;
+      setTotalPages(Math.ceil(total / limit));
     } catch (err) {
-      console.error('Failed to fetch user tasks:', err);
+      console.error('Failed to fetch tasks:', err);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleCreate = async (taskData) => {
+  const handleCreate = async (formData) => {
     try {
-      if (user?.id) {
-        const res = await API.post('/tasks', { ...taskData, creatorId: user.id });
-        setTasks(prev => [...prev, res.data]);
-      } else {
-        alert('User not logged in. Cannot create task.');
-      }
+      await API.post('/tasks', { ...formData, creatorId: user.id });
+      fetchTasks();
     } catch (err) {
       console.error('Error creating task:', err);
     }
   };
 
-  const handleUpdate = async (id, taskData) => {
+  const handleUpdate = async (id, formData) => {
     try {
-      const res = await API.put(`/tasks/${id}`, taskData);
-      setTasks(prev => prev.map(task => (task._id === id ? res.data : task)));
+      await API.put(`/tasks/${id}`, formData);
+      fetchTasks();
       setEditingTask(null);
     } catch (err) {
       console.error('Error updating task:', err);
@@ -56,7 +54,7 @@ export default function TasksPage() {
   const handleDelete = async (id) => {
     try {
       await API.delete(`/tasks/${id}`);
-      setTasks(prev => prev.filter(task => task._id !== id));
+      fetchTasks();
     } catch (err) {
       console.error('Error deleting task:', err);
     }
@@ -67,8 +65,8 @@ export default function TasksPage() {
   };
 
   useEffect(() => {
-    fetchUserTasks();
-  }, [user?.id]);
+    if (user?.id) fetchTasks();
+  }, [user?.id, page]);
 
   return (
     <div style={{ display: 'flex' }}>
@@ -76,25 +74,47 @@ export default function TasksPage() {
       <div style={{ flexGrow: 1 }}>
         <Header />
         <div style={{ padding: '1rem' }}>
-          <h2>Your Tasks</h2>
-          <TaskForm onSubmit={handleCreate} initialData={null} /> {/* Create form */}
+          <h2>Manage Your Tasks</h2>
+
+          {!editingTask && (
+            <>
+              <h3>Create Task</h3>
+              <TaskForm onSubmit={handleCreate} />
+            </>
+          )}
+
           {editingTask && (
             <>
               <h3>Edit Task</h3>
-              <TaskForm onSubmit={(formData) => handleUpdate(editingTask._id, formData)} initialData={editingTask} />
+              <TaskForm
+                onSubmit={(formData) => handleUpdate(editingTask._id, formData)}
+                initialData={editingTask}
+              />
             </>
           )}
+
           {loading ? (
-            <p>Loading your tasks...</p>
+            <p>Loading tasks...</p>
           ) : (
-            tasks.map(task => (
-              <TaskCard
-                key={task._id}
-                task={task}
-                onDelete={handleDelete}
-                onEdit={handleEdit}
-              />
-            ))
+            <>
+              {tasks.map(task => (
+                <TaskCard
+                  key={task._id}
+                  task={task}
+                  onDelete={handleDelete}
+                  onEdit={handleEdit}
+                />
+              ))}
+              <div style={{ marginTop: '1rem' }}>
+                <button onClick={() => setPage(prev => Math.max(1, prev - 1))} disabled={page === 1}>
+                  Previous
+                </button>
+                <span style={{ margin: '0 1rem' }}>Page {page} of {totalPages}</span>
+                <button onClick={() => setPage(prev => Math.min(totalPages, prev + 1))} disabled={page === totalPages}>
+                  Next
+                </button>
+              </div>
+            </>
           )}
         </div>
       </div>

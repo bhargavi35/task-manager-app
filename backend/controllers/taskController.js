@@ -20,13 +20,22 @@ exports.createTask = async (req, res) => {
 
 exports.getAllTasks = async (req, res) => {
   try {
+    const { creatorId, page = 1, limit = 2 } = req.query;
+
     const query = {};
-    console.log('Backend query:', query);
-    if (req.query.creatorId) {
-      query.creatorId = req.query.creatorId;
+    if (creatorId) {
+      query.creatorId = creatorId;
     }
-    const tasks = await Task.find(query).populate('creatorId assigneeId', 'username');
-    res.json(tasks);
+
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    const total = await Task.countDocuments(query);
+
+    const tasks = await Task.find(query)
+      .populate('creatorId assigneeId', 'username')
+      .skip(skip)
+      .limit(parseInt(limit));
+
+    res.json({ tasks, total });
   } catch (error) {
     console.error('Error fetching tasks:', error);
     res.status(500).json({ message: 'Failed to fetch tasks' });

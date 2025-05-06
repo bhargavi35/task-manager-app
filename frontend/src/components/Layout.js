@@ -9,7 +9,7 @@ export default function Layout({ children }) {
       <Header />
       <div style={{ display: 'flex' }}>
         <Sidebar />
-        <main style={{ padding: '20px', flexGrow: 1 }}>
+        <main style={{ padding: '30px', flexGrow: 1 }}>
           {children}
         </main>
       </div>

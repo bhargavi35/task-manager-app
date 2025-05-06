@@ -1,95 +1,82 @@
+// app/dashboard/page.jsx
 'use client';
+
 import { useEffect, useState } from 'react';
 import API from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
-import TaskCard from '../../components/TaskCard';
 import Layout from '../../components/Layout';
 import TaskForm from '../../components/TaskForm';
+import TaskCard from '../../components/TaskCard';
 
 export default function DashboardPage() {
   const { user } = useAuth();
-  // console.log(user, 'user in DashboardPage');
-
   const [tasks, setTasks] = useState([]);
-  // console.log(tasks,'tasks');
-  
-  const [editingTask, setEditingTask] = useState(null);
   const [loadingTasks, setLoadingTasks] = useState(true);
+  const [statusSummary, setStatusSummary] = useState({ open: 0, completed: 0 });
 
-  const fetchUserTasks = async () => {
+  const fetchDashboardData = async () => {
     setLoadingTasks(true);
     try {
       if (user?.id) {
-        const res = await API.get(`/tasks?creatorId=${user.id}`); // Fetch tasks filtered by creatorId
-        setTasks(res.data);
-      } else {
-        setTasks([]); // No user ID, so no tasks to fetch
+        const res = await API.get(`/tasks?creatorId=${user.id}&limit=5&sortBy=dueDate`);
+        const fetchedTasks = res.data.tasks || [];
+
+        setTasks(fetchedTasks);
+
+        const open = fetchedTasks.filter(t => t.status !== 'completed').length;
+        const completed = fetchedTasks.filter(t => t.status === 'completed').length;
+        setStatusSummary({ open, completed });
       }
     } catch (err) {
-      console.error('Error fetching user tasks:', err);
-      if (err.response?.status === 401) {
-        alert("Session expired. Please log in again.");
-        // Consider redirecting to login here
-      }
+      console.error('Error fetching dashboard data:', err);
     } finally {
       setLoadingTasks(false);
     }
   };
 
+  const handleCreate = async (formData) => {
+    try {
+      await API.post('/tasks', { ...formData, creatorId: user.id });
+      fetchDashboardData(); // Refresh list after creating
+    } catch (err) {
+      console.error('Error creating task:', err);
+    }
+  };
+
   useEffect(() => {
-    fetchUserTasks();
-  }, [user?.id]); // Re-fetch tasks when the user ID changes (after login)
-
-  const handleCreateOrUpdate = async (formData) => {
-    try {
-      if (editingTask) {
-        await API.put(`/tasks/${editingTask._id}`, formData);
-      } else {
-        await API.post('/tasks', { ...formData, creatorId: user?.id });
-      }
-      setEditingTask(null);
-      fetchUserTasks();
-    } catch (err) {
-      console.error('Error saving task:', err);
-    }
-  };
-
-  const handleDelete = async (id) => {
-    try {
-      await API.delete(`/tasks/${id}`);
-      fetchUserTasks();
-    } catch (err) {
-      console.error('Error deleting task:', err);
-    }
-  };
-
-  const handleEdit = (task) => {
-    setEditingTask(task);
-  };
+    if (user?.id) fetchDashboardData();
+  }, [user?.id]);
 
   return (
     <Layout>
-      <h2>Welcome, {user?.username}</h2>
-      <h3>{editingTask ? 'Edit Task' : 'Create Task'}</h3>
+      <h2>Welcome back, {user?.username} 👋</h2>
+      
+      <section>
+        <h3>Create a Quick Task</h3>
+        <TaskForm onSubmit={handleCreate} />
+      </section>
 
-      <TaskForm
-        onSubmit={handleCreateOrUpdate}
-        initialData={editingTask}
-      />
+      <section>
+        <h3>Status Summary</h3>
+        <p>🟡 Open: {statusSummary.open} | ✅ Completed: {statusSummary.completed}</p>
+      </section>
 
-      <h3>Your Tasks:</h3>
-      {loadingTasks ? (
-        <p>Loading your tasks...</p>
-      ) : (
-        tasks.map(task => (
-          <TaskCard
-            key={task._id}
-            task={task}
-            onDelete={handleDelete}
-            onEdit={handleEdit}
-          />
-        ))
-      )}
+      <section>
+        <h3>Latest Tasks</h3>
+        {loadingTasks ? (
+          <p>Loading...</p>
+        ) : tasks.length === 0 ? (
+          <p>No recent tasks found.</p>
+        ) : (
+          tasks.map(task => (
+            <TaskCard
+              key={task._id}
+              task={task}
+              showActions={false} // Hide edit/delete in dashboard
+            />
+          ))
+        )}
+      </section>
     </Layout>
   );
 }
